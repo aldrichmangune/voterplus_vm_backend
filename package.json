@@ -1,0 +1,26 @@
+{
+  "name": "voterplus_vm",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "DEBUG=fibonacci:*",
+    "dev": "nodemon app/server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "debug": "^4.1.1",
+    "express": "^4.17.1",
+    "mongoose": "^5.9.2",
+    "socket.io": "^2.3.0"
+  },
+  "devDependencies": {
+    "blind-signatures": "^1.0.6",
+    "mongodb": "^3.5.2",
+    "nodemon": "^2.0.2",
+    "promise": "^8.0.3"
+  }
+}
