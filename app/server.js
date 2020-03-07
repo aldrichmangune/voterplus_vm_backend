@@ -6,6 +6,7 @@ const utils = require('./utils.js');
 const cors = require('cors');
 const controllers = require('./controllers.js');
 const Vote = require('./Vote.js').Vote;
+const axios = require('axios');
 
 const app = express();
 var server = require('http').Server(app);
@@ -69,7 +70,19 @@ app.post('/issues/:codename/submit', async (req, res) => {
 
     console.log("Number of votes:", votes.length)
     console.log("Vote count under issue:", count["vote_count"])
-    //console.log(votes);
+    
+    // let governmint_endpoint = "governmint submit url here";
+
+    // axios.post(governmint_endpoint, {
+    //     issue: issue,
+    //     count: count,
+    //     votes: votes
+    // }).then(function(response) {
+    //     console.log(response.data)
+    // }).catch(function (error) {
+    //     console.log(error);
+    // });
+
     res.json({issue: issue, count: count, votes: votes})
 })
 
