@@ -5,7 +5,6 @@ const uri = config.constants.db.uri;
 const mongoose = require('mongoose');
 
 //const collectionName = config.constants.db.collection;
-//const client = new MongoClient(uri, { useNewUrlParser: true });
 const Promise = require('promise');
 
 // Database Names
@@ -31,14 +30,15 @@ function connect(){
 function submitVote(issue, guid, ris, choice, signature, rtv){
   // Submit vote to votes and Update issues option count
   var vote = {guid: guid, ris: ris, choice: choice, signature: signature, vote_string: rtv, date_added: Date.now()}
-  console.log("Vote to add:", vote)
+  //console.log("Vote to add:", vote)
   var issue_to_update = {code_name: issue}
   var collection = connection.db(votes).collection(issue.toLowerCase());
   var ins_result = collection.insertOne(vote);
   console.log(ins_result);
   if(ins_result){
     collection = connection.db(dbName).collection(issues);
-    collection.updateOne(issue_to_update, {$inc : {choice: 1}})
+    console.log(issue_to_update, choice)
+    collection.updateOne(issue_to_update, {$inc : {vote_count: 1}})
   }
 ;
 }
@@ -47,7 +47,7 @@ function getVotes(issue){
   return(new Promise((resolve, reject) => {
     var collection = connection.db(votes).collection(issue.toLowerCase());
     collection.find().toArray().then(res => {
-      console.log(res)
+      //console.log(res)
       resolve(res)
     })
   }))
@@ -77,6 +77,7 @@ function findDuplicate(issue, vote_guid){
 }
 
 async function getIssues(query){
+  // TODO: Fix options and remove vote_count?
   return(new Promise((resolve, reject) => {
     var collection = connection.db(dbName).collection(issues);
     collection.find(query).toArray().then(results => {
