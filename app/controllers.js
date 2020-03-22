@@ -21,7 +21,9 @@ function verifyVote(socket){
         // socket.rtv = rtv;
 
         // Verify Governmint signature
-        //console.log(parsed_guid, parsed_issue, parsed_idenHashes)
+        // console.log(parsed_guid, parsed_issue, parsed_idenHashes)
+        console.log("Signature: ",signature)
+        console.log("RTV: ", rtv)
         if(!blindSigs.verify({unblinded: signature, E: govKey.keyPair.e, N: govKey.keyPair.n, message: rtv})) {
             console.log(`vote ${parsed_guid} does not have correct governmint signature`);
             return undefined;
@@ -44,40 +46,43 @@ function verifyVote(socket){
 
         // Attach the listener after verifying the vote, ensuring order
         socket.on('get_ris_response', async (data) => {
-                // Check for duplicates from socket.vote_id
-                // [0] = Left [1] = Right
-                console.log("Checking if vote guid exists in database (duplicate)")
-                let existing_vote = await db.findDuplicate(parsed_issue, parsed_guid)
-                
-                // If there is an existing vote, identify the cheater
-                if (existing_vote){
-                    // console.log(existing_vote)
-                    console.log("Vote exists in database")
-                    // var identityString = "IDENTITY STRING"
-                    // utils.revealCheater(existing_vote.ris, data, //identity string)
-                }
-                console.log("Adding vote")
-                
-                // Add vote to database
-                db.submitVote(parsed_issue, parsed_guid, data, choice, signature, rtv);
-        
-                receipt = {
-                    receiptNum: `VR-123456789`, // Random string
-                    voteGuid: 'nope',//socket.vote_id,
-                    vm: 'Test Name change later',
-                    issue: parsed_issue,
-                    choice: choice,
-                    timeStamp: Date.now(),      // Change to date added from database
-                };
-                // add signature
-                console.log("Signing")
-                receipt.signature = blindSigs.sign({
-                    blinded:`${receipt.receiptNum},${receipt.voteGuid},${receipt.vm},${receipt.timeStamp}, ${receipt.choice}`,
-                    key: myKey
-                }).toString();
-                console.log("Receipt:", receipt)
-                socket.emit('receipt', {receipt})
-            })
+            // Check for duplicates from socket.vote_id
+            // [0] = Left [1] = Right
+            console.log("Checking if vote guid exists in database (duplicate)")
+            let existing_vote = await db.findDuplicate(parsed_issue, parsed_guid)
+            
+            // If there is an existing vote, identify the cheater
+            if (existing_vote){
+                // console.log(existing_vote)
+                console.log("Vote exists in database")
+                return undefined
+                // TODO Test reveal Cheater
+                // var identityString = "IDENTITY STRING"
+                // utils.revealCheater(existing_vote.ris, data, //identity string)
+            }
+            console.log("Adding vote")
+            
+            // Add vote to database
+            db.submitVote(parsed_issue, parsed_guid, data, choice, signature, rtv);
+            
+            // TODO generate proper strings for vote receipts
+            receipt = {
+                receiptNum: `VR-123456789`, // Random string
+                voteGuid: socket.vote_id,
+                vm: 'Test Name change later',
+                issue: parsed_issue,
+                choice: choice,
+                timeStamp: Date.now(),      // Change to date added from database
+            };
+            // add signature
+            console.log("Signing")
+            receipt.signature = blindSigs.sign({
+                blinded:`${receipt.receiptNum},${receipt.voteGuid},${receipt.vm},${receipt.timeStamp}, ${receipt.choice}`,
+                key: myKey
+            }).toString();
+            console.log("Receipt:", receipt)
+            socket.emit('receipt', {receipt})
+        })
     
         // Send the left of right options to build ris.
         // [0] = Left [1] = Right
@@ -90,43 +95,52 @@ function verifyVote(socket){
     }
 }
 
-// function submitVote(socket){
-//     const myKey = constants.keys.myKey();
-//     return async (data) => {
-//         // Check for duplicates from socket.vote_id
-//         // [0] = Left [1] = Right
-//         console.log("Checking if vote guid exists in database (duplicate)")
-//         let existing_vote = await db.findDuplicate(socket.issue, socket.vote_id)
-        
-//         // If there is an existing vote, identify the cheater
-//         if (existing_vote){
-//             // console.log(existing_vote)
-//             console.log("Vote exists in database")
-//             // var identityString = "IDENTITY STRING"
-//             // utils.revealCheater(existing_vote.ris, data, //identity string)
-//         }
-//         console.log("Adding vote")
-        
-//         // Add vote to database
-//         db.submitVote(socket.issue, socket.vote_id, data, socket.choice, socket.signature, socket.rtv);
+async function sendVotes(req, res, next){
+    // TODO look at Hassib's code for supertesting
+    let issue = req.params.codename;
+    let votes = await db.getVotes(issue.toLowerCase());
+    let count = await db.getIssueWithCode(issue);
 
-//         receipt = {
-//             receiptNum: `VR-123456789`, // Random string
-//             voteGuid: socket.vote_id,
-//             vm: 'Test Name change later',
-//             issue: socket.issue,
-//             choice: socket.choice,
-//             timeStamp: Date.now(),      // Change to date added from database
-//         };
-//         // add signature
-//         console.log("Signing")
-//         receipt.signature = blindSigs.sign({
-//             blinded:`${receipt.receiptNum},${receipt.voteGuid},${receipt.vm},${receipt.timeStamp}, ${receipt.choice}`,
-//             key: myKey
-//         }).toString();
-//         socket.emit('receipt', {receipt})
-//     }
-// }
+    console.log("Number of votes:", votes.length)
+    console.log("Vote count under issue:", count["vote_count"])
+    
+    if (votes.length == 0){
+        res.status(400).send({err: `No votes to submit for issue ${issue}`})
+    }
+
+    let governmint_endpoint = "http://10.42.0.228:4000/votes";
+
+    // Pre-processing of votes
+    let preProcessedVotes = []
+
+    for (const vote of votes){
+        preProcessedVotes.push({
+            guid: vote.guid,
+            choice: vote.choice,
+            ris: vote.ris,
+            voteStr: vote.vote_string,
+            signature: vote.signature,
+            receiptNum: "VR-123456789" // TODO Retrieve receipt number from db
+        })
+    }
+
+    if (res.statusCode == 200){
+        axios.post(governmint_endpoint, {
+            issue: issue,
+            count: count["vote_count"],
+            votes: preProcessedVotes
+        }).then(function(response) {
+            mess = `Got Response Code ${response.status} Message: ${JSON.stringify(response.data)}`
+            console.log(mess)
+            res.status(200).send({mess})
+            //console.log(response.data)
+        }).catch(function (error) {
+            mess = `Request failed with code ${error.response.status} Message: ${error.response.data.err}`
+            console.log(mess);
+            res.status(error.response.status).send({mess: `Governmint responded with ${error.response.data.err}`})
+        });
+    }
+}
 
 module.exports = {
     verifyVote

@@ -29,7 +29,7 @@ function connect(){
 
 function submitVote(issue, guid, ris, choice, signature, rtv){
   // Submit vote to votes and Update issues option count
-  var vote = {guid: guid, ris: ris, choice: choice, signature: signature, vote_string: rtv, date_added: Date.now()}
+  var vote = {guid: guid, ris: ris, choice: choice, signature: signature, vote_string: rtv, date_added: Date.now()} // TODO Store generated Receipt number
   //console.log("Vote to add:", vote)
   var issue_to_update = {code_name: issue}
   var collection = connection.db(votes).collection(issue.toLowerCase());
@@ -77,7 +77,7 @@ function findDuplicate(issue, vote_guid){
 }
 
 async function getIssues(query){
-  // TODO: Fix options and remove vote_count?
+  // TODO Fix options and remove vote_count?
   return(new Promise((resolve, reject) => {
     var collection = connection.db(dbName).collection(issues);
     collection.find(query).toArray().then(results => {

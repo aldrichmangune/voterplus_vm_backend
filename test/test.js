@@ -21,11 +21,10 @@ describe('Suite of unit tests', function() {
     })
 
     describe('Governmint communication tests', function(){
-        it('Tests sending votes to governmint', function() {
-            axios.post('http://localhost:4000/issues/comdom/submit').then(function(response) {
+        it('Tests sending COMDOM votes to governmint', function() {
+            axios.post('http://localhost:4000/issues/COMDOM/submit').then(function(response) {
                 //console.log(response.data)
-                response.data.issue.should.equal('comdom')
-                response.data.votes.should.be.an('array')
+                response.status.should.equal(200)
                 //done()
             })
         })

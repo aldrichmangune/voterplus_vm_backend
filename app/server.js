@@ -64,26 +64,52 @@ app.get('/issues', async (req, res) => {
 });
 
 app.post('/issues/:codename/submit', async (req, res) => {
+    // TODO look at Hassib's code for supertesting
     let issue = req.params.codename;
-    let votes = await db.getVotes(issue);
-    let count = await db.getIssueWithCode("COMDOM");
+    let votes = await db.getVotes(issue.toLowerCase());
+    let count = await db.getIssueWithCode(issue);
 
     console.log("Number of votes:", votes.length)
     console.log("Vote count under issue:", count["vote_count"])
     
-    // let governmint_endpoint = "governmint submit url here";
+    if (votes.length == 0){
+        res.status(400).send({err: `No votes to submit for issue ${issue}`})
+    }
 
-    // axios.post(governmint_endpoint, {
-    //     issue: issue,
-    //     count: count,
-    //     votes: votes
-    // }).then(function(response) {
-    //     console.log(response.data)
-    // }).catch(function (error) {
-    //     console.log(error);
-    // });
+    let governmint_endpoint = "http://10.42.0.228:4000/votes";
 
-    res.json({issue: issue, count: count, votes: votes})
+    // Pre-processing of votes
+    let preProcessedVotes = []
+
+    for (const vote of votes){
+        preProcessedVotes.push({
+            guid: vote.guid,
+            choice: vote.choice,
+            ris: vote.ris,
+            voteStr: vote.vote_string,
+            signature: vote.signature,
+            receiptNum: "VR-123456789" // TODO Retrieve receipt number from db
+        })
+    }
+
+    if (res.statusCode == 200){
+        axios.post(governmint_endpoint, {
+            issue: issue,
+            count: count["vote_count"],
+            votes: preProcessedVotes
+        }).then(function(response) {
+            mess = `Got Response Code ${response.status} Message: ${JSON.stringify(response.data)}`
+            console.log(mess)
+            res.status(200).send({mess})
+            //console.log(response.data)
+        }).catch(function (error) {
+            mess = `Request failed with code ${error.response.status} Message: ${error.response.data.err}`
+            console.log(mess);
+            res.status(error.response.status).send({mess: `Governmint responded with ${error.response.data.err}`})
+        });
+    }
+
+    //res.json({issue: issue, count: count["vote_count"], votes: preProcessedVotes})
 })
 
 db.connect()
