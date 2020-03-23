@@ -1,0 +1,1 @@
+DB_URI=mongodb+srv://aldrich:aldrich@voterplus-vm-cnriu.mongodb.net/test?retryWrites=true&w=majority

@@ -3,6 +3,9 @@ const fs = require('fs').promises
 const NodeRSA = require('node-rsa')
 
 const env = process.env.NODE_ENV;
+const envVars = require('dotenv').config({
+	path: ('.' + env + 'env')
+})
 
 govKey = undefined
 myPriv = undefined
@@ -34,7 +37,7 @@ const dev = {
         }
     },
     db: {
-        uri: "mongodb://localhost:27017/issues",
+        uri: process.env.DB_URI,
         dbName: "issues",
         collection: "issues"
     },
@@ -60,9 +63,7 @@ const stg = {
         }
     },
     db: {
-        uri: "mongodb+srv://aldrich:aldrich@voterplus-vm-cnriu.mongodb.net/test?retryWrites=true&w=majority", // MongoDB server
-        dbName: "issues",
-        collection: "issues"
+        uri: process.env.DB_URI, // MongoDB server
     },
     keys: {
         govKey: govKey,

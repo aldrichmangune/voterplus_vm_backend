@@ -34,13 +34,11 @@ function submitVote(issue, guid, ris, choice, signature, rtv, receipt){
   var issue_to_update = {code_name: issue}
   var collection = connection.db(votes).collection(issue.toLowerCase());
   var ins_result = collection.insertOne(vote);
-  console.log(ins_result);
   if(ins_result){
     collection = connection.db(issuesDb).collection(issuesCol);
     console.log(issue_to_update, choice)
     collection.updateOne(issue_to_update, {$inc : {vote_count: 1}})
-  }
-;
+  };
 }
 
 function getVotes(issue){
@@ -86,7 +84,7 @@ async function getIssues(query){
       results.forEach((res) => {
         let issue = {
           ...res,
-          options: Object.keys(res.options)
+          options: res.options
         }
         //console.log(issue);    
         fmtRes.push(issue);

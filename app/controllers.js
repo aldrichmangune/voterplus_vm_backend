@@ -18,17 +18,19 @@ function verifyVote(socket){
 
         // Verify Governmint signature
         // console.log(parsed_guid, parsed_issue, parsed_idenHashes)
-        console.log("Signature: ", signature)
-        console.log("RTV: ", rtv)
         if(!blindSigs.verify({unblinded: signature, E: govKey.keyPair.e, N: govKey.keyPair.n, message: rtv})) {
+						let error = new Error(`vote ${parsed_guid} does not have correct governmint signature`)
             console.log(`vote ${parsed_guid} does not have correct governmint signature`);
+						socket.emit('get_ris', {error: error.message})
             return undefined;
         }
 
         // Check if the client issue matches vote issue
         console.log("Governmint signature verified, checking issue");
         if(issue != parsed_issue) {
-            console.log(`Vote ${parsed_guid.slice(5)} is for ${parsed_issue} and is being used for the ${issue} issue`);
+						let error = new Error(`Vote ${parsed_guid.slice(5)} is for ${parsed_issue} and is being used for the ${issue} issue`)
+            console.log(error);
+						socket.emit('get_ris', {error: error.message})
             return undefined;
         }
 
@@ -36,7 +38,9 @@ function verifyVote(socket){
         console.log("Issues match, checking if choice matches")
         let db_issue = await db.getIssueWithCode(issue)
         if(!db_issue.options.includes(choice)) {
-            console.log(`Choice is not valid. Vote ${parsed_guid} is not casted to an existing candidate.`);
+						let error = new Error(`Option is not valid. Vote ${choice} is not casted to an existing option.`)
+            console.log(error);
+						socket.emit('get_ris', {error: error.message})
             return undefined;
         } 
 
@@ -50,7 +54,9 @@ function verifyVote(socket){
             // If there is an existing vote, identify the cheater
             if (existing_vote){
                 // console.log(existing_vote)
-                console.log("Vote exists in database")
+								let error = new Error("RTV has a recorded vote in database")
+                console.log(error)
+								socket.emit('receipt', {error: error.message})
                 return undefined
                 // TODO Test reveal Cheater
                 // var identityString = "IDENTITY STRING"
