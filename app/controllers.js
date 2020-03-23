@@ -4,9 +4,9 @@ const db = require('./db')
 const Vote = require('./Vote').Vote
 const constants = config.constants;
 const utils = require('./utils.js');
+const { v4: uuidv4 } = require('uuid');
 
 function verifyVote(socket){
-    //console.log(`Socketid:${socket.id}. Received ${args}`);
     const govKey = constants.keys.getKey();
     const myKey = constants.keys.myKey();
 
@@ -15,14 +15,10 @@ function verifyVote(socket){
 
         let {guid:parsed_guid, issue:parsed_issue, idenHashes:parsed_idenHashes} = Vote.parseVote(rtv);
         socket.vote_id = parsed_guid;
-        // socket.issue = parsed_issue;
-        // socket.choice = choice;
-        // socket.signature = signature;
-        // socket.rtv = rtv;
 
         // Verify Governmint signature
         // console.log(parsed_guid, parsed_issue, parsed_idenHashes)
-        console.log("Signature: ",signature)
+        console.log("Signature: ", signature)
         console.log("RTV: ", rtv)
         if(!blindSigs.verify({unblinded: signature, E: govKey.keyPair.e, N: govKey.keyPair.n, message: rtv})) {
             console.log(`vote ${parsed_guid} does not have correct governmint signature`);
@@ -60,27 +56,29 @@ function verifyVote(socket){
                 // var identityString = "IDENTITY STRING"
                 // utils.revealCheater(existing_vote.ris, data, //identity string)
             }
-            console.log("Adding vote")
             
-            // Add vote to database
-            db.submitVote(parsed_issue, parsed_guid, data, choice, signature, rtv);
-            
-            // TODO generate proper strings for vote receipts
+            // Generate Receipt
             receipt = {
-                receiptNum: `VR-123456789`, // Random string
+                receiptNum: uuidv4(), // Random string
                 voteGuid: socket.vote_id,
                 vm: 'Test Name change later',
                 issue: parsed_issue,
                 choice: choice,
                 timeStamp: Date.now(),      // Change to date added from database
             };
-            // add signature
+
+            // Sign receipt
             console.log("Signing")
             receipt.signature = blindSigs.sign({
                 blinded:`${receipt.receiptNum},${receipt.voteGuid},${receipt.vm},${receipt.timeStamp}, ${receipt.choice}`,
                 key: myKey
             }).toString();
-            console.log("Receipt:", receipt)
+            
+            // Add vote to database
+            console.log("Adding vote")
+            db.submitVote(parsed_issue, parsed_guid, data, choice, signature, rtv, receipt.receiptNum);
+
+            //console.log("Receipt:", receipt)
             socket.emit('receipt', {receipt})
         })
     
@@ -120,7 +118,7 @@ async function sendVotes(req, res, next){
             ris: vote.ris,
             voteStr: vote.vote_string,
             signature: vote.signature,
-            receiptNum: "VR-123456789" // TODO Retrieve receipt number from db
+            receiptNum: vote.receipt
         })
     }
 

@@ -8,11 +8,11 @@ const mongoose = require('mongoose');
 const Promise = require('promise');
 
 // Database Names
-const dbName = config.constants.db.dbName;
+const issuesDb = "issues";
 const votes = "votes";
 
 // Collection Names
-const issues = "issues";
+const issuesCol = "issues";
 
 // MongoClient Connection
 let connection = null;
@@ -27,16 +27,16 @@ function connect(){
   })
 }
 
-function submitVote(issue, guid, ris, choice, signature, rtv){
+function submitVote(issue, guid, ris, choice, signature, rtv, receipt){
   // Submit vote to votes and Update issues option count
-  var vote = {guid: guid, ris: ris, choice: choice, signature: signature, vote_string: rtv, date_added: Date.now()} // TODO Store generated Receipt number
+  var vote = {guid: guid, ris: ris, choice: choice, signature: signature, vote_string: rtv, receipt: receipt, date_added: Date.now()}
   //console.log("Vote to add:", vote)
   var issue_to_update = {code_name: issue}
   var collection = connection.db(votes).collection(issue.toLowerCase());
   var ins_result = collection.insertOne(vote);
   console.log(ins_result);
   if(ins_result){
-    collection = connection.db(dbName).collection(issues);
+    collection = connection.db(issuesDb).collection(issuesCol);
     console.log(issue_to_update, choice)
     collection.updateOne(issue_to_update, {$inc : {vote_count: 1}})
   }
@@ -57,7 +57,7 @@ async function getIssueWithCode(code_name){
   let query = {code_name: code_name}
 
   return(new Promise((resolve, reject) => {
-      var collection = connection.db(dbName).collection(issues);
+      var collection = connection.db(issuesDb).collection(issuesCol);
       collection.findOne(query).then(res => {
         resolve(res);
       })
@@ -79,7 +79,7 @@ function findDuplicate(issue, vote_guid){
 async function getIssues(query){
   // TODO Fix options and remove vote_count?
   return(new Promise((resolve, reject) => {
-    var collection = connection.db(dbName).collection(issues);
+    var collection = connection.db(issuesDb).collection(issuesCol);
     collection.find(query).toArray().then(results => {
       //console.log(results);
       var fmtRes = [];

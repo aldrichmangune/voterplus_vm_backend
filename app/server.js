@@ -30,7 +30,6 @@ app.use(cors());
 
 app.get('/', async (req, res) => {
     res.send({mess:"hello from voting machine"});
-    //console.log(db.submitVote("test", "test", "test", "test"));
 })
 
 io.on('connection', (socket) => {
@@ -88,7 +87,7 @@ app.post('/issues/:codename/submit', async (req, res) => {
             ris: vote.ris,
             voteStr: vote.vote_string,
             signature: vote.signature,
-            receiptNum: "VR-123456789" // TODO Retrieve receipt number from db
+            receiptNum: vote.receipt
         })
     }
 

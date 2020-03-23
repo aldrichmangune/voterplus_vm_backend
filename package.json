@@ -17,7 +17,9 @@
     "debug": "^4.1.1",
     "express": "^4.17.1",
     "mongoose": "^5.9.2",
-    "socket.io": "^2.3.0"
+    "node-rsa": "^1.0.7",
+    "socket.io": "^2.3.0",
+    "uuid": "^7.0.2"
   },
   "devDependencies": {
     "blind-signatures": "^1.0.6",
