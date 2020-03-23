@@ -29,7 +29,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(cors());
 
 app.get('/', async (req, res) => {
-    res.send({mess:"hello from voting machine"});
+		res.send({mess:"hello from voting machine"});
 })
 
 io.on('connection', (socket) => {

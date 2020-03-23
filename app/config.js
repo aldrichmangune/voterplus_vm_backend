@@ -14,14 +14,13 @@ async function loadKeys (cb) {
   const keyText = await fs.readFile('./keys/pub.pem')
   const pubKey = new NodeRSA()
   govKey = pubKey.importKey(keyText, 'pkcs1-public-pem')
+  console.log('loaded Gov public key')
+  console.log(`N: ${govKey.keyPair.n}`)
+  console.log(`E: ${govKey.keyPair.e}`)
 
   const myKeyText = await fs.readFile('./keys/vm_priv.pem')
   const myPrivKey = new NodeRSA()
   myPriv = myPrivKey.importKey(myKeyText, 'pkcs1-private-pem')
-
-  console.log('loaded the public key')
-  console.log(`N: ${govKey.keyPair.n}`)
-  console.log(`E: ${govKey.keyPair.e}`)
   cb()
 }
 

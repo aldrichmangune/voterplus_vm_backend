@@ -75,10 +75,10 @@ function verifyVote(socket){
 
             // Sign receipt
             console.log("Signing")
-            receipt.signature = blindSigs.sign({
-                blinded:`${receipt.receiptNum},${receipt.voteGuid},${receipt.vm},${receipt.timeStamp}, ${receipt.choice}`,
-                key: myKey
-            }).toString();
+            receipt.signature = myKey.sign(`${receipt.receiptNum},${receipt.voteGuid},${receipt.vm},${receipt.timeStamp},${receipt.choice}`)
+
+						// Use this to verify the signature
+            // [VM_PUBLICKEY].verify(`${receipt.receiptNum},${receipt.voteGuid},${receipt.vm},${receipt.timeStamp},${receipt.choice}`, receipt.signature)
             
             // Add vote to database
             console.log("Adding vote")
