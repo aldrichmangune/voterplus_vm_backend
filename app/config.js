@@ -54,8 +54,8 @@ const dev = {
         }
     },
     db: {
-        uri: "mongodb://localhost:27017/issues",
-        //uri: "mongodb+srv://aldrich:aldrich@voterplus-vm-cnriu.mongodb.net/test?retryWrites=true&w=majority", // MongoDB server
+        //uri: "mongodb://localhost:27017/issues",
+        uri: "mongodb+srv://aldrich:aldrich@voterplus-vm-cnriu.mongodb.net/test?retryWrites=true&w=majority", // MongoDB server
         dbName: "issues",
         collection: "issues"
     },

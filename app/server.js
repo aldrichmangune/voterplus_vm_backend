@@ -30,7 +30,7 @@ app.use(cors());
 
 app.get('/', async (req, res) => {
     res.send({mess:"hello from voting machine"});
-    console.log(db.submitVote("test", "test", "test", "test"));
+    //console.log(db.submitVote("test", "test", "test", "test"));
 })
 
 io.on('connection', (socket) => {
