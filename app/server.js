@@ -113,10 +113,18 @@ app.get('/issues/:codename/submit', async (req, res) => {
 db.connect()
     .then(() => console.log('database connected'))
     .then(config.loadKeys(() => {
-        server.listen(port, host, () => console.log(`listening on http://${host}:${port}`))
+        server.listen(port, host, () => {
+            console.log(`listening on http://${host}:${port}`)
+            app.emit('appStarted')
+        })
     }))
     .catch((e) => {
         console.error(e);
         // Always hard exit on a database connection error
         process.exit(1);
     });
+
+
+    //async function initApp (expApp, httpServer)
+
+module.exports = app//, config.sqlPoolConfig, config.mongoUrl, config.mongoCollection, config.port, config.on)

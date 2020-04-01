@@ -13,6 +13,11 @@ function verifyVote(socket){
 	const govKey = constants.keys.getKey();
 	const myKey = constants.keys.myKey();
 
+	// Events
+	getRis = 'get_ris'
+	getRisRes = 'get_ris_response'
+	receipt = 'receipt'
+
 	const idenString = "This is one voting right for";
 	console.log(idenString)
 
@@ -23,7 +28,7 @@ function verifyVote(socket){
 		if(!rtv.includes(idenString)){
 			let error = new Error(`Did not submit a valid GovernMint issued voting right`)
 			console.log(error);
-			socket.emit('get_ris', {error: error.message})
+			socket.emit(getRis, {error: error.message})
 			return undefined;
 		}
 
@@ -34,14 +39,14 @@ function verifyVote(socket){
 		if(!signature){
 			let error = new Error(`Vote does not have a Governmint signature`)
 			console.log(`vote does not have a Governmint signature`);
-			socket.emit('get_ris', {error: error.message})
+			socket.emit(getRis, {error: error.message})
 			return undefined;
 		}
 
 		if(!blindSigs.verify({unblinded: signature, N: govKey.keyPair.n, E: govKey.keyPair.e, message: rtv})) {
 			let error = new Error(`vote ${parsed_guid} does not have correct governmint signature`)
 			console.log(`vote ${parsed_guid} does not have correct governmint signature`);
-			socket.emit('get_ris', {error: error.message})
+			socket.emit(getRis, {error: error.message})
 			return undefined;
 		}
 
@@ -63,7 +68,7 @@ function verifyVote(socket){
 //		catch (error) {
 //			console.log("RTV has a recorded vote in database: ", error)
 //		}
-			socket.emit('get_ris', {error: error.message})
+			socket.emit(getRis, {error: error.message})
 			return undefined
 		}
 
@@ -72,7 +77,7 @@ function verifyVote(socket){
 		if(issue != parsed_issue) {
 			let error = new Error(`Vote ${parsed_guid.slice(5)} is for ${parsed_issue} and is being used for the ${issue} issue`)
 			console.log(error);
-			socket.emit('get_ris', {error: error.message})
+			socket.emit(getRis, {error: error.message})
 			return undefined;
 		}
 
@@ -82,12 +87,12 @@ function verifyVote(socket){
 		if(!db_issue.options.includes(choice)) {
 			let error = new Error(`Option is not valid. Vote ${choice} is not casted to an existing option.`)
 			console.log(error);
-			socket.emit('get_ris', {error: error.message})
+			socket.emit(getRis, {error: error.message})
 			return undefined;
 		} 
 
 		// Attach the listener after verifying the vote, ensuring order
-		socket.on('get_ris_response', async (data) => {
+		socket.on(getRisRes, async (data) => {
 			// Generate Receipt
 			receipt = {
 				receiptNum: uuidv4(), // Random string
@@ -107,7 +112,7 @@ function verifyVote(socket){
 			db.submitVote(parsed_issue, parsed_guid, data, choice, signature, rtv, receipt.receiptNum);
 
 			//console.log("Receipt:", receipt)
-			socket.emit('receipt', {receipt})
+			socket.emit(receipt, {receipt})
 		})
 
 		// Send the left of right options to build ris.
@@ -117,7 +122,7 @@ function verifyVote(socket){
 		for (var i = 0; i < ris_req.length; i++) {
 			ris_req[i] = parseInt(Math.random() * 100) % 2;
 		}
-		socket.emit('get_ris', {ris_req});
+		socket.emit(getRis, {ris_req});
 	}
 }
 

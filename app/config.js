@@ -39,8 +39,9 @@ const dev = {
     },
     db: {
         uri: process.env.DB_URI,
-        dbName: "issues",
-        collection: "issues"
+        issuesDB: "test_issues",
+        issuesCol: "issues",
+        votesDB: "test_votes"
     },
     keys: {
         govKey: govKey,
@@ -118,11 +119,11 @@ const stg2 = {
 const config = {
     dev,
     stg,
-		stg2
+    stg2
 };
 
 //module.exports = config[env]
 module.exports = {
     constants: config[env],
-    loadKeys: loadKeys  
+    loadKeys: loadKeys
 }
