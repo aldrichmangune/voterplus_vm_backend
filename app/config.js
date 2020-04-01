@@ -28,6 +28,8 @@ const dev = {
     app: {
         port: 4000,
         host: "0.0.0.0",
+				vmName: "Development VM",
+				governmintHost: "http://voterplus-backend-governmint--hassib.repl.co",
         supportedIssues: {
             code_name: {
                 $in: ["POWERNET", "COMDOM", "SCENTRIC", "ZYTREK", "ICOLOGY"], // Example supported issues on this vm
@@ -54,6 +56,8 @@ const stg = {
     app: {
         port: 4000,
         host: "0.0.0.0",
+				vmName: "Repl.it VM",
+				governmintVotesEndpoint: "https://VoterPlus-backend-governmint--hassib.repl.co/votes",
         supportedIssues: {
             code_name: {
                 $in: ["POWERNET", "COMDOM", "SCENTRIC", "ZYTREK", "ICOLOGY"], // Example supported issues on this vm
@@ -62,6 +66,38 @@ const stg = {
         }
     },
     db: {
+        uri: process.env.DB_URI, // MongoDB server
+				issuesDB: "votemachines",
+				issuesCol: "vm-010",
+				votesDB: "votes_vm010"
+    },
+    keys: {
+        govKey: govKey,
+        getKey: () => govKey,
+        myKey: () => myPriv
+    },
+    vote: {
+        getRisLen: () => 10,
+    }
+}
+
+const stg2 = {
+    app: {
+        port: 4000,
+        host: "0.0.0.0",
+				vmName: "vm-011",
+				governmintVotesEndpoint: "https://VoterPlus-backend-governmint--hassib.repl.co/votes",
+        supportedIssues: {
+            code_name: {
+                $in: ["POWERNET", "COMDOM", "SCENTRIC", "ZYTREK", "ICOLOGY"], // Example supported issues on this vm
+                //deadline: { $gt: Current timestmp}
+            }
+        }
+    },
+    db: {
+				issuesDB: "votemachines",
+				issuesCol: "vm-011",
+				votesDB: "votes_vm011",
         uri: process.env.DB_URI, // MongoDB server
     },
     keys: {
@@ -81,7 +117,8 @@ const stg = {
 
 const config = {
     dev,
-    stg
+    stg,
+		stg2
 };
 
 //module.exports = config[env]

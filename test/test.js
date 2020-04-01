@@ -6,6 +6,9 @@ const axios = require('axios');
 const Vote = require('../app/Vote.js').Vote
 //, expect = require('expect.js');
 
+const config = require('./config');
+const constants = config.constants;
+
 describe('Suite of unit tests', function() {
 
     var socket;
@@ -22,7 +25,7 @@ describe('Suite of unit tests', function() {
 
     describe('Governmint communication tests', function(){
         it('Tests sending COMDOM votes to governmint', function() {
-            axios.post('http://localhost:4000/issues/COMDOM/submit').then(function(response) {
+            axios.get('https://voterplus-backend-votemachine--hassib.repl.co/issues/COMDOM/submit').then(function(response) {
                 //console.log(response.data)
                 response.status.should.equal(200)
                 //done()

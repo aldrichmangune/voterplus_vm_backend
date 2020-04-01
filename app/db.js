@@ -1,6 +1,7 @@
 const config = require('./config');
 const MongoClient = require('mongodb').MongoClient;
 const uri = config.constants.db.uri;
+const constants = config.constants;
 
 const mongoose = require('mongoose');
 
@@ -8,11 +9,11 @@ const mongoose = require('mongoose');
 const Promise = require('promise');
 
 // Database Names
-const issuesDb = "issues";
-const votes = "votes";
+const issuesDb = constants.db.issuesDB;
+const votes = constants.db.votesDB; // CHANGE TODO FIX
 
 // Collection Names
-const issuesCol = "issues";
+const issuesCol = constants.db.issuesCol;
 
 // MongoClient Connection
 let connection = null;

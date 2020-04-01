@@ -62,7 +62,7 @@ app.get('/issues', async (req, res) => {
     }   
 });
 
-app.post('/issues/:codename/submit', async (req, res) => {
+app.get('/issues/:codename/submit', async (req, res) => {
     // TODO look at Hassib's code for supertesting
     let issue = req.params.codename;
     let votes = await db.getVotes(issue.toLowerCase());
@@ -74,8 +74,7 @@ app.post('/issues/:codename/submit', async (req, res) => {
     if (votes.length == 0){
         res.status(400).send({err: `No votes to submit for issue ${issue}`})
     }
-
-    let governmint_endpoint = "http://10.42.0.228:4000/votes";
+    let governmint_endpoint = config.constants.app.governmintVotesEndpoint;
 
     // Pre-processing of votes
     let preProcessedVotes = []
