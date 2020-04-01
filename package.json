@@ -20,6 +20,7 @@
     "mongoose": "^5.9.2",
     "node-rsa": "^1.0.7",
     "socket.io": "^2.3.0",
+    "supertest": "^4.0.2",
     "uuid": "^7.0.2"
   },
   "devDependencies": {

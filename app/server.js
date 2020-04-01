@@ -56,7 +56,7 @@ app.get('/issues', async (req, res) => {
         }); 
         let result = await promise;
         //console.log("Obtained issues, sending")
-        res.json(result);
+        res.status(200).json(result);
     } catch (e) {
         console.log(e);
     }   

@@ -45,6 +45,28 @@ function verifyVote(socket){
 			return undefined;
 		}
 
+		// Check for duplicates from socket.vote_id
+		console.log("Checking if vote guid exists in database")
+		let existing_vote = await db.findDuplicate(parsed_issue, parsed_guid)
+		// If there is an existing vote, identify the cheater
+		if (existing_vote){
+			// console.log(existing_vote)
+			let error = new Error("RTV has a recorded vote in database")
+			console.log(error)
+//		var identityString = idenString
+//		console.log(existing_vote.ris)
+//		console.log(data)
+//		try {
+//			const cheater = utils.revealCheater(existing_vote.ris, data, identityString)
+//			console.log('Identified cheater:', {cheater})
+//		}
+//		catch (error) {
+//			console.log("RTV has a recorded vote in database: ", error)
+//		}
+			socket.emit('get_ris', {error: error.message})
+			return undefined
+		}
+
 		// Check if the client issue matches vote issue
 		console.log("Governmint signature verified, checking issue");
 		if(issue != parsed_issue) {
@@ -66,32 +88,6 @@ function verifyVote(socket){
 
 		// Attach the listener after verifying the vote, ensuring order
 		socket.on('get_ris_response', async (data) => {
-			// Check for duplicates from socket.vote_id
-			// [0] = Left [1] = Right
-			console.log("Checking if vote guid exists in database")
-			let existing_vote = await db.findDuplicate(parsed_issue, parsed_guid)
-			
-			// If there is an existing vote, identify the cheater
-			if (existing_vote){
-				// console.log(existing_vote)
-				let error = new Error("RTV has a recorded vote in database")
-				console.log(error)
-				var identityString = idenString
-				console.log(existing_vote.ris)
-				console.log(data)
-				try {
-					const cheater = utils.revealCheater(existing_vote.ris, data, identityString)
-					console.log('Identified cheater:', {cheater})
-				}
-				catch (error) {
-					console.log("RTV has a recorded vote in database: ", error)
-				}
-				socket.emit('receipt', {error: error.message})
-				return undefined
-				// TODO Test reveal Cheater
-
-			}
-			
 			// Generate Receipt
 			receipt = {
 				receiptNum: uuidv4(), // Random string
@@ -105,19 +101,6 @@ function verifyVote(socket){
 			// Sign receipt
 			console.log("Signing")
 			receipt.signature = myKey.sign(`${receipt.receiptNum},${receipt.voteGuid},${receipt.vm},${receipt.timeStamp},${receipt.choice}`, 'hex');
-
-			// Use this to verify the signature
-			// const pubKeyText = `-----BEGIN RSA PUBLIC KEY-----
-			// 										MIIBCgKCAQEAiN19r5yAEWPL64CGbZMaGnlcsRthgNefey3VF5PpUgH8fst4dGQj
-			// 										11xRUZZXx0Q3CP/jDwdnQdlR0UBAvORGOdnOi0dQ5lO/p4AEJw/1sThTNUyOMl7B
-			// 										TuLVReYn8rOkuvopMHB+IhAZSJcvEK6nNMWJo+D2ZkpF+wqFq+m83VKeJAiyufHQ
-			// 										aqpOH8s80hL5epm5QepRbDXCHKr2ixUfSC62M+NMgWO19PxYhawsO6HUb5/itXBp
-			// 										AeyomW069U56FTAlvbGNcUECoJE0hOhglBMcah0nqtyNkInUev3aaf/9lfiIL3S5
-			// 										N+lRG4sojKk4Bp7lXxIT420bF+tOGG4GUwIDAQAB
-			// 										-----END RSA PUBLIC KEY-----`
-			// const pubKey = new NodeRSA()
-			// pubKey.importKey(pubKeyText, 'pkcs1-public-pem')
-			// console.log("testing rsa signature: ", pubKey.verify(`${receipt.receiptNum},${receipt.voteGuid},${receipt.vm},${receipt.timeStamp},${receipt.choice}`, receipt.signature))
 
 			// Add vote to database
 			console.log("Adding vote")
