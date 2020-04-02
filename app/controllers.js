@@ -16,10 +16,9 @@ function verifyVote(socket){
 	// Events
 	getRis = 'get_ris'
 	getRisRes = 'get_ris_response'
-	receipt = 'receipt'
+	receiptEvent = 'receipt'
 
 	const idenString = "This is one voting right for";
-	console.log(idenString)
 
 	return async ({signature, rtv, issue, choice}) => {
 		//console.log({signature, rtv, issue, choice})
@@ -107,12 +106,25 @@ function verifyVote(socket){
 			console.log("Signing")
 			receipt.signature = myKey.sign(`${receipt.receiptNum},${receipt.voteGuid},${receipt.vm},${receipt.timeStamp},${receipt.choice}`, 'hex');
 
+			// Use this to verify the signature
+			const pubKeyText = `-----BEGIN RSA PUBLIC KEY-----
+MIIBCgKCAQEAiN19r5yAEWPL64CGbZMaGnlcsRthgNefey3VF5PpUgH8fst4dGQj
+11xRUZZXx0Q3CP/jDwdnQdlR0UBAvORGOdnOi0dQ5lO/p4AEJw/1sThTNUyOMl7B
+TuLVReYn8rOkuvopMHB+IhAZSJcvEK6nNMWJo+D2ZkpF+wqFq+m83VKeJAiyufHQ
+aqpOH8s80hL5epm5QepRbDXCHKr2ixUfSC62M+NMgWO19PxYhawsO6HUb5/itXBp
+AeyomW069U56FTAlvbGNcUECoJE0hOhglBMcah0nqtyNkInUev3aaf/9lfiIL3S5
+N+lRG4sojKk4Bp7lXxIT420bF+tOGG4GUwIDAQAB
+-----END RSA PUBLIC KEY-----`
+			const pubKey = new NodeRSA()
+			pubKey.importKey(pubKeyText, 'pkcs1-public-pem')
+			console.log("testing rsa signature: ", pubKey.verify(`${receipt.receiptNum},${receipt.voteGuid},${receipt.vm},${receipt.timeStamp},${receipt.choice}`, receipt.signature, 'utf8', 'hex'))
+
 			// Add vote to database
 			console.log("Adding vote")
 			db.submitVote(parsed_issue, parsed_guid, data, choice, signature, rtv, receipt.receiptNum);
 
 			//console.log("Receipt:", receipt)
-			socket.emit(receipt, {receipt})
+			socket.emit(receiptEvent, {receipt})
 		})
 
 		// Send the left of right options to build ris.

@@ -55,22 +55,22 @@ const dev = {
 
 const stg = {
     app: {
-        port: 4000,
-        host: "0.0.0.0",
-				vmName: "Repl.it VM",
-				governmintVotesEndpoint: "https://VoterPlus-backend-governmint--hassib.repl.co/votes",
+        port: process.env.APP_PORT,
+        host: process.env.APP_HOST,
+        vmName: process.env.VM_NAME,
+        governmintVotesEndpoint: process.env.VM_NAME,
         supportedIssues: {
             code_name: {
-                $in: ["POWERNET", "COMDOM", "SCENTRIC", "ZYTREK", "ICOLOGY"], // Example supported issues on this vm
+                $in: process.env.SUPPORTED_ISSUES.split(','), // Example supported issues on this vm
                 //deadline: { $gt: Current timestmp}
             }
         }
     },
     db: {
         uri: process.env.DB_URI, // MongoDB server
-				issuesDB: "votemachines",
-				issuesCol: "vm-010",
-				votesDB: "votes_vm010"
+        issuesDB: process.env.DB_ISSUESDB,
+        issuesCol: process.env.DB_ISSUESCOL,
+        votesDB: process.env.DB_VOTESDB
     },
     keys: {
         govKey: govKey,
@@ -84,22 +84,22 @@ const stg = {
 
 const stg2 = {
     app: {
-        port: 4000,
-        host: "0.0.0.0",
-				vmName: "vm-011",
-				governmintVotesEndpoint: "https://VoterPlus-backend-governmint--hassib.repl.co/votes",
+        port: process.env.APP_PORT,
+        host: process.env.APP_HOST,
+        vmName: process.env.VM_NAME,
+        governmintVotesEndpoint: process.env.VM_NAME,
         supportedIssues: {
             code_name: {
-                $in: ["POWERNET", "COMDOM", "SCENTRIC", "ZYTREK", "ICOLOGY"], // Example supported issues on this vm
+                $in: process.env.SUPPORTED_ISSUES.split(','), // Example supported issues on this vm
                 //deadline: { $gt: Current timestmp}
             }
         }
     },
     db: {
-				issuesDB: "votemachines",
-				issuesCol: "vm-011",
-				votesDB: "votes_vm011",
         uri: process.env.DB_URI, // MongoDB server
+        issuesDB: process.env.DB_ISSUESDB,
+        issuesCol: process.env.DB_ISSUESCOL,
+        votesDB: process.env.DB_VOTESDB
     },
     keys: {
         govKey: govKey,

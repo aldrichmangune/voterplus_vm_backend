@@ -13,13 +13,13 @@ const Vote = require('../app/Vote.js').Vote
 const config = require('../app/config');
 const constants = config.constants;
 
-describe('Suite of unit tests', function() {
-
-	before(function (done) {
-		app.on("appStarted", function(){
-			done();
-		})
+before(function (done) {
+	app.on("appStarted", function(){
+		done();
 	})
+})
+
+describe('Suite of unit tests', function() {
 
 	var socket;
 	

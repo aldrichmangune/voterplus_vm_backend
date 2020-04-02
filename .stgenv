@@ -1,1 +1,9 @@
+VM_NAME=vm-010
+GOVERNMINTVOTESENDPOINT=https://VoterPlus-backend-governmint--hassib.repl.co/votes
+SUPPORTED_ISSUES=POWERNET,COMDOM,SCENTRIC,ZYTREK,ICOLOGY
+APP_PORT=4000
+APP_HOST=0.0.0.0
 DB_URI=mongodb+srv://aldrich:aldrich@voterplus-vm-cnriu.mongodb.net/test?retryWrites=true&w=majority
+DB_ISSUESDB=votemachines
+DB_ISSUESCOL=vm-010
+DB_VOTESDB=votes_vm010
