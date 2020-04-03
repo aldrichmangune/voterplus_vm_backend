@@ -181,7 +181,8 @@ async function sendVotes(req, res, next){
 async function getVMIssues(req, res) {
 	try {
 			//console.log(req)
-			const supportedIssues =  config.constants.app.supportedIssues
+			const supportedIssues = config.constants.app.supportedIssues
+			console.log(supportedIssues)
 			let promise = new Promise((resolve, reject) => {
 					db.getIssues(supportedIssues).then(data => {
 							//console.log(data);
@@ -196,15 +197,15 @@ async function getVMIssues(req, res) {
 	}   
 }
 
-async function getGovIssues(req, res) {
+async function getGovIssues() {
 	let governmint_endpoint = config.constants.app.governmintVotesEndpoint + '/issues/vm'
-	try{axios.get(governmint_endpoint)
-	.then(function(response) {
-		issues = response.data
-		console.log(issues)
-		//mess = `Got Response Code ${response.status} Message: ${JSON.stringify(response.data)}`
-    //console.log(mess)
-	})
+	try{
+		axios.get(governmint_endpoint)
+		.then(function(response) {
+			issues = response.data
+			console.log(issues)
+			return issues
+		})
 	} catch (e) {
 		console.log(e)
 	}

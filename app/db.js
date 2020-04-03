@@ -2,6 +2,7 @@ const config = require('./config');
 const MongoClient = require('mongodb').MongoClient;
 const uri = config.constants.db.uri;
 const constants = config.constants;
+const axios = require('axios');
 
 const mongoose = require('mongoose');
 
@@ -18,6 +19,8 @@ const issuesCol = constants.db.issuesCol;
 // MongoClient Connection
 let connection = null;
 
+let governmint_endpoint = config.constants.app.governmintVotesEndpoint + '/issues/vm'
+
 function connect(){
   return new Promise((resolve, reject) => {
     MongoClient.connect(uri, async function(err, db) {
@@ -25,7 +28,14 @@ function connect(){
       connection = db;
 			let vmIssues = await getIssues({})
 			if (vmIssues === undefined || vmIssues.length == 0){
-				console.log("Warning: VM Issues not found")
+				connection.db(issuesDb).createCollection(issuesCol);
+				axios.get(governmint_endpoint)
+				.then(function(response) {
+					console.log("Warning: VM Issues not found, creating Collection with Governmint issues")
+					issues = response.data
+					console.log(issues)
+					connection.db(issuesDb).collection(issuesCol).insertMany(issues)
+				})
 			}
 			resolve(db);
     });
@@ -97,6 +107,16 @@ async function getIssues(query){
       resolve(fmtRes)
     })
   }))
+}
+
+function createIssuesCol(){
+	return(new Promise((resolve, reject) => {
+      var collection = connection.db(issuesDb).createCollection(issuesCol);
+      collection.findOne(query).then(res => {
+        resolve(res);
+      })
+    })
+  )
 }
 
 module.exports = {
