@@ -3,8 +3,7 @@ var io = require('socket.io-client')
 , should = require('chai').should();
 
 const supertest = require('supertest')
-app = require('../app/server')
-var request = supertest.agent(app)
+var request
 
 const axios = require('axios');
 const Vote = require('../app/Vote.js').Vote
@@ -13,44 +12,42 @@ const Vote = require('../app/Vote.js').Vote
 const config = require('../app/config');
 const constants = config.constants;
 
-before(function (done) {
-	app.on("appStarted", function(){
-		done();
-	})
-})
+const issueToTest = 'COMDOM'
 
 describe('Suite of unit tests', function() {
-
-	var socket;
+	before(async function () {
+		this.timeout(7000)
+		const serverPromise = require('../app/server')
+		server = await serverPromise
+		request = supertest(server)
+	})		
+	var socket;	
 	
 	describe('Front-end Endpoint tests', async function() {
-
-		
-		it('Gets Issues', async (done) =>
+		it('Gets Issues', (done) =>
 		{
-			// this.timeout(15000)
-			// const app = await require('../app/server')
-			// request = supertest(app)
-
 			request
 				.get('/issues')
 				.expect(res =>
 				{
 					console.log('Response from get issues', res.body)
+					assert(res.body.length > 0, `Vote Machine has ${res.body.length} issues`)
 				})
 				.expect(200)
-				.expect('Content-Type', /json/)
 				.end(done)
 		})
 	})
 
 	describe('Governmint communication tests', function(){
 		it('Tests sending COMDOM votes to governmint', function() {
-			axios.get('https://voterplus-backend-votemachine--hassib.repl.co/issues/COMDOM/submit').then(function(response) {
-				//console.log(response.data)
-				response.status.should.equal(200)
-				//done()
-			})
+			request
+				.get('/issues/COMDOM/submit')
+				.expect(res =>
+				{
+					console.log('Response from get issues', res.body)
+				})
+				.expect(200)
+				.end(done)
 		})
 	})
 

@@ -182,7 +182,6 @@ async function getVMIssues(req, res) {
 	try {
 			//console.log(req)
 			const supportedIssues = config.constants.app.supportedIssues
-			console.log(supportedIssues)
 			let promise = new Promise((resolve, reject) => {
 					db.getIssues(supportedIssues).then(data => {
 							//console.log(data);

@@ -47,22 +47,26 @@ app.get('/govIssues', controllers.getGovIssues);
 
 // Endpoint to submit votes to Governmint
 app.get('/issues/:codename/submit', controllers.sendVotes);
-
-db.connect()
-    .then(() => console.log('database connected'))
-    .then(config.loadKeys(() => {
-        server.listen(port, host, () => {
-            console.log(`listening on http://${host}:${port}`)
-            app.emit('appStarted')
+const serverPromise = new Promise((resolve, reject) => {
+	db.connect()
+			.then((db) => {
+        console.log('DB connected')
+        config.loadKeys(() => {
+          console.log("keys loaded")
+					server.listen(port, host, console.log(`listening on http://${host}:${port}`))
+					resolve(server)
         })
-    }))
-    .catch((e) => {
-        console.error(e);
-        // Always hard exit on a database connection error
-        process.exit(1);
-    });
+      })
+			.catch((e) => {
+					console.error(e);
+          reject(e)
+					// Always hard exit on a database connection error
+					process.exit(1);
+			});
+
+})
 
 
     //async function initApp (expApp, httpServer)
 
-module.exports = app//, config.sqlPoolConfig, config.mongoUrl, config.mongoCollection, config.port, config.on)
+module.exports = serverPromise//, config.sqlPoolConfig, config.mongoUrl, config.mongoCollection, config.port, config.on)

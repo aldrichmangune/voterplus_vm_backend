@@ -26,17 +26,17 @@ function connect(){
     MongoClient.connect(uri, async function(err, db) {
       if (err) { reject(err); return; };
       connection = db;
-			let vmIssues = await getIssues({})
-			if (vmIssues === undefined || vmIssues.length == 0){
-				connection.db(issuesDb).createCollection(issuesCol);
-				axios.get(governmint_endpoint)
-				.then(function(response) {
-					console.log("Warning: VM Issues not found, creating Collection with Governmint issues")
-					issues = response.data
-					console.log(issues)
-					connection.db(issuesDb).collection(issuesCol).insertMany(issues)
-				})
-			}
+			// let vmIssues = await getIssues({})
+			// if (vmIssues === undefined || vmIssues.length == 0){
+			// 	connection.db(issuesDb).createCollection(issuesCol);
+			// 	axios.get(governmint_endpoint)
+			// 	.then(function(response) {
+			// 		console.log("Warning: VM Issues not found, creating Collection with Governmint issues")
+			// 		issues = response.data
+			// 		//console.log(issues)
+			// 		connection.db(issuesDb).collection(issuesCol).insertMany(issues)
+			// 	})
+			// }
 			resolve(db);
     });
   })
