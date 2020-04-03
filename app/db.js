@@ -20,10 +20,14 @@ let connection = null;
 
 function connect(){
   return new Promise((resolve, reject) => {
-    MongoClient.connect(uri, function(err, db) {
+    MongoClient.connect(uri, async function(err, db) {
       if (err) { reject(err); return; };
-      resolve(db);
       connection = db;
+			let vmIssues = await getIssues({})
+			if (vmIssues === undefined || vmIssues.length == 0){
+				console.log("Warning: VM Issues not found")
+			}
+			resolve(db);
     });
   })
 }

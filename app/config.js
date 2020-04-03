@@ -58,7 +58,7 @@ const stg = {
         port: process.env.APP_PORT,
         host: process.env.APP_HOST,
         vmName: process.env.VM_NAME,
-        governmintVotesEndpoint: process.env.VM_NAME,
+        governmintVotesEndpoint: process.env.GOVERNMINT_ENDPOINT,
         supportedIssues: {
             code_name: {
                 $in: process.env.SUPPORTED_ISSUES.split(','), // Example supported issues on this vm
@@ -87,7 +87,7 @@ const stg2 = {
         port: process.env.APP_PORT,
         host: process.env.APP_HOST,
         vmName: process.env.VM_NAME,
-        governmintVotesEndpoint: process.env.VM_NAME,
+        governmintVotesEndpoint: process.env.GOVERNMINT_ENDPOINT,
         supportedIssues: {
             code_name: {
                 $in: process.env.SUPPORTED_ISSUES.split(','), // Example supported issues on this vm

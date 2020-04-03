@@ -5,6 +5,7 @@ const Vote = require('./Vote').Vote
 const constants = config.constants;
 const utils = require('./utils.js');
 const { v4: uuidv4 } = require('uuid');
+const axios = require('axios');
 
 const NodeRSA = require('node-rsa')
 const fs = require('fs').promises
@@ -57,16 +58,6 @@ function verifyVote(socket){
 			// console.log(existing_vote)
 			let error = new Error("RTV has a recorded vote in database")
 			console.log(error)
-//		var identityString = idenString
-//		console.log(existing_vote.ris)
-//		console.log(data)
-//		try {
-//			const cheater = utils.revealCheater(existing_vote.ris, data, identityString)
-//			console.log('Identified cheater:', {cheater})
-//		}
-//		catch (error) {
-//			console.log("RTV has a recorded vote in database: ", error)
-//		}
 			socket.emit(getRis, {error: error.message})
 			return undefined
 		}
@@ -108,13 +99,13 @@ function verifyVote(socket){
 
 			// Use this to verify the signature
 			const pubKeyText = `-----BEGIN RSA PUBLIC KEY-----
-MIIBCgKCAQEAiN19r5yAEWPL64CGbZMaGnlcsRthgNefey3VF5PpUgH8fst4dGQj
-11xRUZZXx0Q3CP/jDwdnQdlR0UBAvORGOdnOi0dQ5lO/p4AEJw/1sThTNUyOMl7B
-TuLVReYn8rOkuvopMHB+IhAZSJcvEK6nNMWJo+D2ZkpF+wqFq+m83VKeJAiyufHQ
-aqpOH8s80hL5epm5QepRbDXCHKr2ixUfSC62M+NMgWO19PxYhawsO6HUb5/itXBp
-AeyomW069U56FTAlvbGNcUECoJE0hOhglBMcah0nqtyNkInUev3aaf/9lfiIL3S5
-N+lRG4sojKk4Bp7lXxIT420bF+tOGG4GUwIDAQAB
------END RSA PUBLIC KEY-----`
+			MIIBCgKCAQEAiN19r5yAEWPL64CGbZMaGnlcsRthgNefey3VF5PpUgH8fst4dGQj
+			11xRUZZXx0Q3CP/jDwdnQdlR0UBAvORGOdnOi0dQ5lO/p4AEJw/1sThTNUyOMl7B
+			TuLVReYn8rOkuvopMHB+IhAZSJcvEK6nNMWJo+D2ZkpF+wqFq+m83VKeJAiyufHQ
+			aqpOH8s80hL5epm5QepRbDXCHKr2ixUfSC62M+NMgWO19PxYhawsO6HUb5/itXBp
+			AeyomW069U56FTAlvbGNcUECoJE0hOhglBMcah0nqtyNkInUev3aaf/9lfiIL3S5
+			N+lRG4sojKk4Bp7lXxIT420bF+tOGG4GUwIDAQAB
+			-----END RSA PUBLIC KEY-----`
 			const pubKey = new NodeRSA()
 			pubKey.importKey(pubKeyText, 'pkcs1-public-pem')
 			console.log("testing rsa signature: ", pubKey.verify(`${receipt.receiptNum},${receipt.voteGuid},${receipt.vm},${receipt.timeStamp},${receipt.choice}`, receipt.signature, 'utf8', 'hex'))
@@ -148,10 +139,9 @@ async function sendVotes(req, res, next){
 	console.log("Vote count under issue:", count["vote_count"])
 	
 	if (votes.length == 0){
-			res.status(400).send({err: `No votes to submit for issue ${issue}`})
+		res.status(400).send({err: `No votes to submit for issue ${issue}`})
 	}
-
-	let governmint_endpoint = "http://10.42.0.228:4000/votes";
+	let governmint_endpoint = config.constants.app.governmintVotesEndpoint + '/votes';
 
 	// Pre-processing of votes
 	let preProcessedVotes = []
@@ -166,6 +156,8 @@ async function sendVotes(req, res, next){
 			receiptNum: vote.receipt
 		})
 	}
+
+	//console.log(`issue: ${issue}, count: ${count["vote_count"]}, votes: ${JSON.stringify(preProcessedVotes)}`)
 
 	if (res.statusCode == 200){
 		axios.post(governmint_endpoint, {
@@ -183,8 +175,44 @@ async function sendVotes(req, res, next){
 			res.status(error.response.status).send({mess: `Governmint responded with ${error.response.data.err}`})
 		});
 	}
+	//res.json({issue: issue, count: count["vote_count"], votes: preProcessedVotes})
+}
+
+async function getVMIssues(req, res) {
+	try {
+			//console.log(req)
+			const supportedIssues =  config.constants.app.supportedIssues
+			let promise = new Promise((resolve, reject) => {
+					db.getIssues(supportedIssues).then(data => {
+							//console.log(data);
+							resolve(data);
+					});
+			}); 
+			let result = await promise;
+			//console.log("Obtained issues, sending")
+			res.status(200).json(result);
+	} catch (e) {
+			console.log(e);
+	}   
+}
+
+async function getGovIssues(req, res) {
+	let governmint_endpoint = config.constants.app.governmintVotesEndpoint + '/issues/vm'
+	try{axios.get(governmint_endpoint)
+	.then(function(response) {
+		issues = response.data
+		console.log(issues)
+		//mess = `Got Response Code ${response.status} Message: ${JSON.stringify(response.data)}`
+    //console.log(mess)
+	})
+	} catch (e) {
+		console.log(e)
+	}
 }
 
 module.exports = {
-	verifyVote
+	verifyVote,
+	getVMIssues,
+	getGovIssues,
+	sendVotes
 }

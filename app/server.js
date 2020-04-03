@@ -15,8 +15,6 @@ var io = require('socket.io')(server);
 const port = config.constants.app.port;
 const host = config.constants.app.host;
 
-const supportedIssues =  config.constants.app.supportedIssues
-
 const db = require('./db');
 
 const bodyParser = require('body-parser')
@@ -33,11 +31,8 @@ app.get('/', async (req, res) => {
 })
 
 io.on('connection', (socket) => {
-
     console.log('New socket connected', socket.id)
-
     socket.on('vote', controllers.verifyVote(socket))
-
     // log disconnection
     socket.on('disconnect', () => {
       console.log('socket', socket.id, 'disconnected')
@@ -45,70 +40,13 @@ io.on('connection', (socket) => {
   })
 
 // GET Supported Issues
-app.get('/issues', async (req, res) => {
-    try {
-        //console.log(req)
-        let promise = new Promise((resolve, reject) => {
-            db.getIssues(supportedIssues).then(data => {
-                //console.log(data);
-                resolve(data);
-            });
-        }); 
-        let result = await promise;
-        //console.log("Obtained issues, sending")
-        res.status(200).json(result);
-    } catch (e) {
-        console.log(e);
-    }   
-});
+app.get('/issues', controllers.getVMIssues);
 
-app.get('/issues/:codename/submit', async (req, res) => {
-    // TODO look at Hassib's code for supertesting
-    let issue = req.params.codename;
-    let votes = await db.getVotes(issue.toLowerCase());
-    let count = await db.getIssueWithCode(issue);
+// GET Governmint Issues
+app.get('/govIssues', controllers.getGovIssues);
 
-    console.log("Number of votes:", votes.length)
-    console.log("Vote count under issue:", count["vote_count"])
-    
-    if (votes.length == 0){
-        res.status(400).send({err: `No votes to submit for issue ${issue}`})
-    }
-    let governmint_endpoint = config.constants.app.governmintVotesEndpoint;
-
-    // Pre-processing of votes
-    let preProcessedVotes = []
-
-    for (const vote of votes){
-        preProcessedVotes.push({
-            guid: vote.guid,
-            choice: vote.choice,
-            ris: vote.ris,
-            voteStr: vote.vote_string,
-            signature: vote.signature,
-            receiptNum: vote.receipt
-        })
-    }
-
-    if (res.statusCode == 200){
-        axios.post(governmint_endpoint, {
-            issue: issue,
-            count: count["vote_count"],
-            votes: preProcessedVotes
-        }).then(function(response) {
-            mess = `Got Response Code ${response.status} Message: ${JSON.stringify(response.data)}`
-            console.log(mess)
-            res.status(200).send({mess})
-            //console.log(response.data)
-        }).catch(function (error) {
-            mess = `Request failed with code ${error.response.status} Message: ${error.response.data.err}`
-            console.log(mess);
-            res.status(error.response.status).send({mess: `Governmint responded with ${error.response.data.err}`})
-        });
-    }
-
-    //res.json({issue: issue, count: count["vote_count"], votes: preProcessedVotes})
-})
+// Endpoint to submit votes to Governmint
+app.get('/issues/:codename/submit', controllers.sendVotes);
 
 db.connect()
     .then(() => console.log('database connected'))
