@@ -1,4 +1,4 @@
-VM_NAME=Development VM
+VM_NAME=vm-test
 GOVERNMINT_ENDPOINT=https://VoterPlus-backend-governmint--hassib.repl.co
 SUPPORTED_ISSUES=POWERNET,COMDOM,SCENTRIC,ZYTREK,ICOLOGY
 APP_PORT=4000

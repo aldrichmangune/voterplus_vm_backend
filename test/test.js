@@ -24,7 +24,7 @@ describe('Suite of unit tests', function() {
 	var socket;	
 	
 	describe('Front-end Endpoint tests', async function() {
-		it('Gets Issues', (done) =>
+		it('Gets Issues to send to Front-end', (done) =>
 		{
 			request
 				.get('/issues')
@@ -39,7 +39,7 @@ describe('Suite of unit tests', function() {
 	})
 
 	describe('Governmint communication tests', function(){
-		it('Tests sending COMDOM votes to governmint', function() {
+		it('Tests sending COMDOM votes to governmint', (done) => {
 			request
 				.get('/issues/COMDOM/submit')
 				.expect(res =>
