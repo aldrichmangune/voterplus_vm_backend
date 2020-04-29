@@ -26,17 +26,18 @@ function connect(){
     MongoClient.connect(uri, async function(err, db) {
       if (err) { reject(err); return; };
       connection = db;
-			// let vmIssues = await getIssues({})
-			// if (vmIssues === undefined || vmIssues.length == 0){
-			// 	connection.db(issuesDb).createCollection(issuesCol);
-			// 	axios.get(governmint_endpoint)
-			// 	.then(function(response) {
-			// 		console.log("Warning: VM Issues not found, creating Collection with Governmint issues")
-			// 		issues = response.data
-			// 		//console.log(issues)
-			// 		connection.db(issuesDb).collection(issuesCol).insertMany(issues)
-			// 	})
-			// }
+			let vmIssues = await getIssues({})
+			if (vmIssues === undefined || vmIssues.length == 0){
+				connection.db(issuesDb).createCollection(issuesCol);
+				axios.get(governmint_endpoint)
+				.then(function(response) {
+					console.log("Warning: VM Issues not found, creating Collection with Governmint issues")
+					issues = response.data
+					//console.log(issues)
+					const modIssues = issues.map(o => ({...o, vote_count: 0}))
+					connection.db(issuesDb).collection(issuesCol).insertMany(modIssues)
+				})
+			}
 			resolve(db);
     });
   })
@@ -46,7 +47,7 @@ function submitVote(issue, guid, ris, choice, signature, rtv, receipt){
   // Submit vote to votes and Update issues option count
   var vote = {guid: guid, ris: ris, choice: choice, signature: signature, vote_string: rtv, receipt: receipt, date_added: Date.now()}
   //console.log("Vote to add:", vote)
-  var issue_to_update = {code_name: issue}
+  var issue_to_update = {name: issue}
   var collection = connection.db(votes).collection(issue.toLowerCase());
   var ins_result = collection.insertOne(vote);
   if(ins_result){
@@ -67,7 +68,7 @@ function getVotes(issue){
 }
 
 async function getIssueWithCode(code_name){
-  let query = {code_name: code_name}
+  let query = {name: code_name}
 
   return(new Promise((resolve, reject) => {
       var collection = connection.db(issuesDb).collection(issuesCol);

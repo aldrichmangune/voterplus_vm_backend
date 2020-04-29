@@ -31,7 +31,7 @@ const vars = {
         vmName: process.env.VM_NAME,
         governmintVotesEndpoint: process.env.GOVERNMINT_ENDPOINT,
         supportedIssues: {
-            code_name: {
+            name: {
                 $in: process.env.SUPPORTED_ISSUES.split(','), // Example supported issues on this vm
                 //deadline: { $gt: Current timestmp}
             }

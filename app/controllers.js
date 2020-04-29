@@ -202,7 +202,7 @@ async function getGovIssues() {
 		axios.get(governmint_endpoint)
 		.then(function(response) {
 			issues = response.data
-			console.log(issues)
+			//console.log(issues)
 			return issues
 		})
 	} catch (e) {
