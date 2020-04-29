@@ -87,7 +87,7 @@ describe('Suite of unit tests', function() {
 		it('Testing Verify Vote', function(done) {
 			socket.emit('vote', {issue:'COMDOM', choice:'optiona', rtv:rtv,signature: signature })
 			socket.on('get_ris', ({ ris_req, error: rtvError = undefined }) => {
-					ris_req.should.be.an('array')
+					//ris_req.should.be.an('array')
 
 					let { guid, issue: voteIssue, E: voteE, N: voteN, idenHashes: [ leftHash, rightHash ] } = Vote.parseVote(rtv);
 					let currentVote = new Vote(null, null, null, null, signature, rtv, leftHash, rightHash);

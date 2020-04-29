@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_ENV=stg mocha",
+    "test": "NODE_ENV=test mocha",
     "start": "DEBUG=fibonacci:*",
     "dev": "nodemon app/server.js"
   },
