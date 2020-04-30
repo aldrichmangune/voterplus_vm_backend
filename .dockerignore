@@ -6,7 +6,7 @@ localconfig
 
 # Keys
 sample vote.json
-keys/vm_priv.pem
+keys
 
 # Logs
 logs

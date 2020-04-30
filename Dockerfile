@@ -9,3 +9,5 @@ RUN npm install --save-prod
 COPY . .
 
 EXPOSE 4000
+
+CMD ["npm", "run", "dev"]
